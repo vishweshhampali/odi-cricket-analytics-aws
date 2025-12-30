@@ -18,4 +18,4 @@ So I built an end-to-end ODI cricket analytics pipeline on AWS that takes raw JS
 
 ## Architecture Overview
 
-[![High level diagram](High level diagram "High level diagram")](https://github.com/vishweshhampali/odi-cricket-analytics-aws/blob/main/AWS_pipeline.jpg "High level diagram")
+[![High level diagram](https://github.com/vishweshhampali/odi-cricket-analytics-aws/blob/main/AWS_pipeline.jpg "High level diagram")]
