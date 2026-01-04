@@ -112,3 +112,100 @@ From staging, I populate dimension tables using MERGE (upsert) logic.
 - dim_match links match metadata to teams, venue, and date
 
 This structure I believe is much easier for analytics than repeatedly joining raw text fields.
+
+### 5. Fact table: one row per ball (dw.fact_delivery)
+
+The central fact table is dw.fact_delivery, with one row per delivery, including the following.
+
+**Keys (for joining)**
+- match_key
+- batting_team_key, bowling_team_key
+- striker_player_key, non_striker_player_key, bowler_player_key
+- venue_key, date_key (via match)
+
+**Natural identifiers**
+- match_id
+- innings, over, ball_in_over
+
+**Measures & flags**
+- runs_off_bat, extras, total_runs
+- is_boundary_4, is_boundary_6
+- is_wicket, dismissal_kind
+
+**Metadata**
+- ingest_date
+- stg_modified_ts (useful for late corrections)
+
+**Deduplication Rule**
+
+If the same delivery appears again due to source corrections, I keep the latest version using a simple rule like:
+*“take the most recent stg_modified_ts per (match_id, innings, over, ball).”*
+
+### 6. Mart layer: batsman-focused materialized views
+
+A ball-level fact table is powerful, but not ideal for BI users. Most dashboard users don’t want to aggregate from “one row per ball” every time.
+
+So I created a mart layer with batsman-focused materialized views. Example views:
+
+**mart.batsman_summary_mv - One row per batsman per match:**
+
+- runs, balls, 4s, 6s
+- strike rate
+- dismissal info
+- opponent, venue, match date
+
+**mart.batsman_career_mv - Career-level aggregates:**
+
+- matches, innings, total runs, total balls
+- average, strike rate
+- boundaries
+
+**mart.batsman_dismissal_mv - Dismissal breakdown:**
+
+- bowled / caught / LBW / run out etc. counts
+
+These marts make QuickSight fast and easy to use.
+
+*Mart definition reference: DDL_MART_BATSMAN.py (in above repo)*
+
+### 7. Visualisation: QuickSight dashboard
+
+On top of the mart layer, I built a Batsman Performance dashboard in Amazon QuickSight.
+
+The dashboard allows you to select a batsman and explore:
+
+- run and strike-rate trends over time
+- performance vs opponents
+- best/worst venues
+- dismissal patterns
+
+![High level diagram](https://github.com/vishweshhampali/odi-cricket-analytics-aws/blob/main/AWS_pipeline.jpg)
+
+Please follow the link for PDF version [[click here](*Code + SQL scripts: [https://github.com/vishweshhampali/odi-cricket-analytics-aws]*  ## Architecture Overview  ![High level diagram](https://github.com/vishweshhampali/odi-cricket-analytics-aws/blob/main/AWS_pipeline.jpg) "click here")]
+
+### Challenges and Learnings
+
+**Nested JSON complexity**
+Cricket scorecards have multiple levels of nesting. Designing the Spark schema and flattening logic carefully was essential.
+
+**Incremental ingestion (no reprocessing everything)**
+Checksum-based deduplication + manifest files made ingestion repeatable, traceable, and easy to debug.
+
+**Dimensional modelling for sports data**
+It was a solid real-world exercise in star schema design:
+- stable keys
+- reusable dimensions
+- facts that work for multiple reporting needs
+
+**Designing for BI usability (not just “data exists”)**
+The mart layer made the difference between “data in a warehouse” and “data people can actually use”.
+
+### Future scope for improvements
+
+**If I extend the platform, I wouldd add:**
+
+- orchestration (Step Functions or MWAA/Airflow)
+- automated data quality tests (e.g., null/duplicate thresholds)
+- monitoring/alerts (CloudWatch metrics + notifications)
+- dbt-style modelling for the mart layer
+- CI/CD for deploying SQL + Glue jobs
