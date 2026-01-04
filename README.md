@@ -179,7 +179,7 @@ The dashboard allows you to select a batsman and explore:
 - best/worst venues
 - dismissal patterns
 
-![High level diagram]https://github.com/vishweshhampali/odi-cricket-analytics-aws/blob/main/dashboard_image.png)
+![High level diagram](https://github.com/vishweshhampali/odi-cricket-analytics-aws/blob/main/dashboard_image.png)
 
 Please follow the link for PDF version [click here](https://github.com/vishweshhampali/odi-cricket-analytics-aws/blob/main/Sheet_1_2025-12-29T19_12_46.pdf "click here").
 
