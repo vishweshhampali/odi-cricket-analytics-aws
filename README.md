@@ -18,7 +18,7 @@ So I built an end-to-end ODI cricket analytics pipeline on AWS that takes raw JS
 
 ## Architecture Overview
 
-![High level diagram](https://github.com/vishweshhampali/odi-cricket-analytics-aws/blob/main/AWS_pipeline.jpg)
+![High level diagram](https://github.com/vishweshhampali/odi-cricket-analytics-aws/blob/main/AWS_pipeline.png)
 
 At a high level, the pipeline does this:
 1. Ingest ODI JSON scorecards once and store them in S3 (raw)
